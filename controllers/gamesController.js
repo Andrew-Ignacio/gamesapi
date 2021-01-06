@@ -1,22 +1,50 @@
 const Game = require("../models/Game")
 
 exports.index = (req, res) => {
+
+  let HATEOAS = [
+    {
+      href: "http://localhost:3000/auth",
+      rel: "login",
+      method: "POST"
+    }
+  ]
+
   Game.findAll()
   .then(games => {
     res.statusCode = 200
-    res.json(games)
+    res.json({games: games, _links: HATEOAS})
   })
   .catch(err => res.sendStatus(500))
 }
 
 exports.game = (req, res) => {
   let id = req.params.id
+
+  let HATEOAS = [
+    {
+      href: "http://localhost:3000/game/" + id,
+      rel: "delte_game",
+      method: "DELETE"
+    },
+    {
+      href: "http://localhost:3000/game/" + id,
+      rel: "edit_game",
+      method: "PUT"
+    },
+    {
+      href: "http://localhost:3000/games",
+      rel: "get_all_games",
+      method: "GET"
+    }
+  ]
+
   if(isNaN(id)) res.sendStatus(400)
   Game.findByPk(id)
   .then(game => {
     if(game == undefined) res.sendStatus(404)
     res.statusCode = 200
-    res.json(game)
+    res.json({game: game, _links: HATEOAS})
   })
 }
 
